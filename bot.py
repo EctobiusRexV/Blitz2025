@@ -29,3 +29,7 @@ class Bot:
 
         # You can clearly do better than the random actions above! Have fun!
         return actions
+
+    def ramasseCaca(self):
+        for
+            if
