@@ -47,9 +47,46 @@ class Bot:
                 grid[(item.position.x, item.position.y)] = -2
 
         #print(grid)
+
+        nb_char_gather = len(game_message.yourCharacters)
+
+        list_blitzium = list(zip(*np.where(grid >= 1)))
+        list_to_get = []
+        for blitzium_pos in list_blitzium:
+            if blitzium_pos not in self.teamZone:
+                list_to_get.append((blitzium_pos, grid[blitzium_pos]))
+
+        numeric_values = [(tuple(map(lambda x: x.item(), pair[0])), pair[1].item()) for pair in list_to_get]
+
+        for character in game_message.yourCharacters:
+            actions.append(MoveToAction(characterId=character.id, position=Position(numeric_values[0][0][0], numeric_values[0][0][1])))
+            print()
+
+        # for character in game_message.yourCharacters:
+        #     if len(character.carriedItems) == 0:
+
+
+        # for character in game_message.yourCharacters:
+        #     if len(character.carriedItems) == 3:
+        #         if character.position in self.teamZone:
+        #             if grid[character.position.x, character.position.y] == 0:
+        #                 actions.append(DropAction(characterId=character.id))
+        #             else:
+        #                 actions.append(random.choice(
+        #                     [MoveUpAction(characterId=character.id), MoveDownAction(characterId=character.id),
+        #                      MoveLeftAction(characterId=character.id), MoveRightAction(characterId=character.id)]
+        #                 ))
+        #         else:
+        #             MoveToAction(characterId=character.id, position=self.teamZone[0])
+        #     else:
+        #         for position in grid:
+        #             if position == 5:
+
+
+
         # You can clearly do better than the random actions above! Have fun!
         return actions
 
     def ramasseCaca(self, game_message):
-        for line in range()
         #print(game_message.teamZoneGrid)
+        pass
