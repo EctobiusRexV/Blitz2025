@@ -168,8 +168,8 @@ class Bot:
                         liste.append(GrabAction(characterId = game_message.character.id))"""
         #print(grid)
         list_caca = list(zip(*np.where(grid <= -2)))
-        print("LISTE CACA")
-        print(list_caca)
+        #print("LISTE CACA")
+        #print(list_caca)
 
         list_to_clean = []
         for caca_pos in list_caca:
@@ -178,22 +178,19 @@ class Bot:
                 list_to_clean.append(caca_pos)
 
 
-        print("LISTE TO CLEAN")
-        print(list_to_clean)
+        #print("LISTE TO CLEAN")
+        #print(list_to_clean)
 
         numeric_values = [(pair[0].item(), pair[1].item()) for pair in list_to_clean]
 
-        print("NUMERIC VALUES")
-        print(numeric_values)
+        #print("NUMERIC VALUES")
+        #print(numeric_values)
         for character in game_message.yourCharacters:
             liste.append(MoveToAction(characterId = character.id, position=Position(numeric_values[0][0], numeric_values[0][1])))
 
         #AJOUTER UN MESSAGE DERREUR S'IL NY A PAS D'OBJET À PICKUP
-        for character in game_message.yourCharacters:
-            liste.append(GrabAction(characterId = character.id))
-
-
-
+        ##for character in game_message.yourCharacters:
+         #   liste.append(GrabAction(characterId = character.id))
 
 
 
