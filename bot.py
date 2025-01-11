@@ -1,4 +1,6 @@
 import random
+
+import game_message
 from game_message import *
 import numpy as np
 
@@ -7,6 +9,7 @@ class Bot:
     def __init__(self):
         print("Initializing your super mega duper bot")
         self.wall_positions = []
+        self.teamZone = []
 
     def get_next_move(self, game_message: TeamGameState):
         """
@@ -20,6 +23,10 @@ class Bot:
                     if game_message.map.tiles[line][column] == TileType.WALL:
                         self.wall_positions.append((line, column))
 
+            for line in range(len(game_message.map.tiles)):
+                for column in range(len(game_message.map.tiles[line])):
+                    if game_message.currentTeamId == game_message.teamZoneGrid[line][column]:
+                        self.teamZone.append((line, column))
 
         grid = np.zeros((game_message.map.width, game_message.map.height))
         grid_size = (game_message.map.width, game_message.map.height)
@@ -39,11 +46,10 @@ class Bot:
             elif item.type == "radiant_slag":
                 grid[(item.position.x, item.position.y)] = -2
 
-        print(grid)
-
+        #print(grid)
         # You can clearly do better than the random actions above! Have fun!
         return actions
 
-    def ramasseCaca(self):
-        for
-            if
+    def ramasseCaca(self, game_message):
+        for line in range()
+        #print(game_message.teamZoneGrid)
