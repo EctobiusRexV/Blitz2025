@@ -180,7 +180,7 @@ class Bot:
             # liste.append(MoveToAction(characterId = character.id, position=Position(numeric_values[0][0], numeric_values[0][1])))
 
         #AJOUTER UN MESSAGE DERREUR S'IL NY A PAS D'OBJET À PICKUP
-        print(self.enemyZone)
+        #print(self.enemyZone)
         for character in game_message.yourCharacters:
             position = (character.position.x, character.position.y)
             if len(character.carriedItems) == 1:
@@ -221,11 +221,6 @@ class Bot:
             #     liste.append(MoveToAction(characterId = character.id, position = self.enemyZone[1]))
 
         #Sortir le caca de la zone
-
-
-
-
-
 
         return liste
 
