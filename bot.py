@@ -46,10 +46,39 @@ class Bot:
             elif item.type == "radiant_slag":
                 grid[(item.position.x, item.position.y)] = -2
 
+        actions.extend(self.ramasseCaca(game_message, grid))
+
         #print(grid)
         # You can clearly do better than the random actions above! Have fun!
         return actions
 
-    def ramasseCaca(self, game_message):
-        for line in range()
-        #print(game_message.teamZoneGrid)
+    def ramasseCaca(self, game_message, grid):
+        liste = []
+        caca = (-5.0, -2.0)
+
+        """for row in grid:
+            for space in row:
+                print(space)
+                if space == -5:
+                    if space in self.teamZone:
+
+                        liste.append(MoveToAction(characterId = game_message.character.id, position = space))
+                        liste.append(GrabAction(characterId = game_message.character.id))"""
+
+        list_caca = list(zip(*np.where(grid <= -2)))
+        list_to_clean = []
+        for caca_pos in list_caca:
+
+            if caca_pos in self.teamZone:
+                list_to_clean.append(caca_pos)
+
+        numeric_values = [(tuple(map(lambda x: x.item(), pair[0])), pair[1].item()) for pair in list_to_get]
+
+        for caca in list_to_clean:
+            for character in game_message.yourCharacters:
+                liste.append(MoveToAction(characterId = character.id, position = caca))
+                liste.append(GrabAction(characterId = character.id))
+
+
+        return liste
+
