@@ -59,8 +59,19 @@ class Bot:
         numeric_values = [(tuple(map(lambda x: x.item(), pair[0])), pair[1].item()) for pair in list_to_get]
 
         for character in game_message.yourCharacters:
-            actions.append(MoveToAction(characterId=character.id, position=Position(numeric_values[0][0][0], numeric_values[0][0][1])))
-            print()
+            position = (character.position.x, character.position.y)
+            if len(character.carriedItems) == 1:
+                if position in self.teamZone and grid[position] == 0:
+                    actions.append(DropAction(characterId=character.id))
+                else:
+                    for case in self.teamZone:
+                        if grid[case] == 0:
+                            actions.append(MoveToAction(characterId=character.id, position=Position(case[0], case[1])))
+
+            if grid[character.position.x, character.position.y] > 0 and position not in self.teamZone:
+                actions.append(GrabAction(characterId=character.id))
+            else:
+                actions.append(MoveToAction(characterId=character.id, position=Position(numeric_values[0][0][0], numeric_values[0][0][1])))
 
         # for character in game_message.yourCharacters:
         #     if len(character.carriedItems) == 0:
@@ -83,7 +94,7 @@ class Bot:
         #             if position == 5:
 
 
-
+        print(actions)
         # You can clearly do better than the random actions above! Have fun!
         return actions
 
