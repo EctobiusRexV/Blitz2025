@@ -177,17 +177,34 @@ class Bot:
                         else:
                             for case in self.enemyZone:
                                 if grid[case] == 0:
-                                    actions.append(
-                                        MoveToAction(characterId=character.id, position=Position(case[0], case[1])))
-                                    characters_with_actions.add(character.id)
+                                    path = a_star_search(position, case, grid, grid_size)
+                                    if path and len(path) > 1:
+                                        next_step = path[1]  # Move to the next position in the path
+                                        actions.append(
+                                            MoveToAction(characterId=character.id,
+                                                         position=Position(next_step[0], next_step[1])))
+                                        characters_with_actions.add(character.id)  # Mark the character as having an action
+                                        break
+                                    # actions.append(
+                                    #     MoveToAction(characterId=character.id, position=Position(case[0], case[1])))
+                                    # characters_with_actions.add(character.id)
                     elif grid[character.position.x, character.position.y] <= -2 and position in self.teamZone:
                         actions.append(GrabAction(characterId=character.id))
                         characters_with_actions.add(character.id)
                     else:
                         if numeric_caca:
-                            actions.append(MoveToAction(characterId=character.id,
-                                                      position=Position(numeric_caca[0][0], numeric_caca[0][1])))
-                            characters_with_actions.add(character.id)
+                            for case in numeric_caca:
+                                path = a_star_search(position, case, grid, grid_size)
+                                if path and len(path) > 1:
+                                    next_step = path[1]  # Move to the next position in the path
+                                    actions.append(
+                                        MoveToAction(characterId=character.id,
+                                                     position=Position(next_step[0], next_step[1])))
+                                    characters_with_actions.add(character.id)  # Mark the character as having an action
+                                    break
+                            # actions.append(MoveToAction(characterId=character.id,
+                            #                           position=Position(numeric_caca[0][0], numeric_caca[0][1])))
+                            # characters_with_actions.add(character.id)
             else:
 
                 position = (character.position.x, character.position.y)
@@ -200,9 +217,17 @@ class Bot:
                     else:
                         for case in self.teamZone:
                             if grid[case] == 0:
-                                actions.append(MoveToAction(characterId=character.id, position=Position(case[0], case[1])))
-                                characters_with_actions.add(character.id)  # Mark the character as having an action
-                                break
+                                path = a_star_search(position, case, grid, grid_size)
+                                if path and len(path) > 1:
+                                    next_step = path[1]  # Move to the next position in the path
+                                    actions.append(
+                                        MoveToAction(characterId=character.id,
+                                                     position=Position(next_step[0], next_step[1])))
+                                    characters_with_actions.add(character.id)  # Mark the character as having an action
+                                    break
+                                # actions.append(MoveToAction(characterId=character.id, position=Position(case[0], case[1])))
+                                # characters_with_actions.add(character.id)  # Mark the character as having an action
+                                # break
 
                 if grid[character.position.x, character.position.y] > 0 and position not in self.teamZone:
                     actions.append(GrabAction(characterId=character.id))
