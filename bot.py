@@ -34,9 +34,10 @@ class Bot:
                         self.teamZone.append((line, column))
 
         # Initialize grid and set up enemy positions
+            enemies = game_message.otherCharacters
             for line in range(len(game_message.map.tiles)):
                 for column in range(len(game_message.map.tiles[line])):
-                    if game_message.currentTeamId != game_message.teamZoneGrid[line][column]:
+                    if enemies[0].teamId == game_message.teamZoneGrid[line][column]:
                         self.enemyZone.append((line, column))
 
 
