@@ -62,7 +62,7 @@ class Bot:
 
         for character in game_message.yourCharacters:
             actions.append(MoveToAction(characterId=character.id, position=Position(numeric_values[0][0][0], numeric_values[0][0][1])))
-            print()
+            #print()
 
         # for character in game_message.yourCharacters:
         #     if len(character.carriedItems) == 0:
@@ -91,7 +91,7 @@ class Bot:
 
     def ramasseCaca(self, game_message, grid):
         liste = []
-        caca = (-5.0, -2.0)
+
 
         """for row in grid:
             for space in row:
@@ -101,20 +101,35 @@ class Bot:
 
                         liste.append(MoveToAction(characterId = game_message.character.id, position = space))
                         liste.append(GrabAction(characterId = game_message.character.id))"""
-
+        #print(grid)
         list_caca = list(zip(*np.where(grid <= -2)))
+        print("LISTE CACA")
+        print(list_caca)
+
         list_to_clean = []
         for caca_pos in list_caca:
-
+            #print(caca_pos) #caca_pos: list64
             if caca_pos in self.teamZone:
                 list_to_clean.append(caca_pos)
 
-        numeric_values = [(tuple(map(lambda x: x.item(), pair[0])), pair[1].item()) for pair in list_to_get]
 
-        for caca in list_to_clean:
-            for character in game_message.yourCharacters:
-                liste.append(MoveToAction(characterId = character.id, position = caca))
-                liste.append(GrabAction(characterId = character.id))
+        print("LISTE TO CLEAN")
+        print(list_to_clean)
+
+        numeric_values = [(pair[0].item(), pair[1].item()) for pair in list_to_clean]
+
+        print("NUMERIC VALUES")
+        print(numeric_values)
+        for character in game_message.yourCharacters:
+            liste.append(MoveToAction(characterId = character.id, position=Position(numeric_values[0][0], numeric_values[0][1])))
+
+        #AJOUTER UN MESSAGE DERREUR S'IL NY A PAS D'OBJET À PICKUP
+        for character in game_message.yourCharacters:
+            liste.append(GrabAction(characterId = character.id))
+
+
+
+
 
 
         return liste
