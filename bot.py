@@ -155,6 +155,7 @@ class Bot:
 
             if len(numeric_caca) > 0 or somme < 0:
                 for character in game_message.yourCharacters:
+
                     position = (character.position.x, character.position.y)
                     if len(character.carriedItems) == 1:
                         if position in self.enemyZone and grid[position] == 0:
@@ -175,16 +176,26 @@ class Bot:
                                     characters_with_actions.add(character.id)
 
                         else:
+                            possible_path = []
                             for case in self.enemyZone:
                                 if grid[case] == 0:
                                     path = a_star_search(position, case, grid, grid_size)
                                     if path and len(path) > 1:
-                                        next_step = path[1]  # Move to the next position in the path
-                                        actions.append(
-                                            MoveToAction(characterId=character.id,
-                                                         position=Position(next_step[0], next_step[1])))
-                                        characters_with_actions.add(character.id)  # Mark the character as having an action
-                                        break
+                                        possible_path.append(path)  # Move to the next position in the path
+
+                            if possible_path:
+                                shortest_path = possible_path[0]
+                                for path in possible_path:
+                                    if len(path) < len(shortest_path):
+                                        shortest_path = path
+
+                                next_step = shortest_path[1]
+                                actions.append(
+                                    MoveToAction(characterId=character.id,
+                                                 position=Position(next_step[0], next_step[1])))
+                                characters_with_actions.add(character.id)
+
+
                                     # actions.append(
                                     #     MoveToAction(characterId=character.id, position=Position(case[0], case[1])))
                                     # characters_with_actions.add(character.id)
@@ -192,16 +203,24 @@ class Bot:
                         actions.append(GrabAction(characterId=character.id))
                         characters_with_actions.add(character.id)
                     else:
+                        possible_path = []
                         if numeric_caca:
                             for case in numeric_caca:
                                 path = a_star_search(position, case, grid, grid_size)
                                 if path and len(path) > 1:
-                                    next_step = path[1]  # Move to the next position in the path
-                                    actions.append(
-                                        MoveToAction(characterId=character.id,
-                                                     position=Position(next_step[0], next_step[1])))
-                                    characters_with_actions.add(character.id)  # Mark the character as having an action
-                                    break
+                                    possible_path.append(path)  # Move to the next position in the path
+
+                            if possible_path:
+                                shortest_path = possible_path[0]
+                                for path in possible_path:
+                                    if len(path) < len(shortest_path):
+                                        shortest_path = path
+
+                                next_step = shortest_path[1]
+                                actions.append(
+                                    MoveToAction(characterId=character.id,
+                                                 position=Position(next_step[0], next_step[1])))
+                                characters_with_actions.add(character.id)
                             # actions.append(MoveToAction(characterId=character.id,
                             #                           position=Position(numeric_caca[0][0], numeric_caca[0][1])))
                             # characters_with_actions.add(character.id)
@@ -212,19 +231,40 @@ class Bot:
                 if len(character.carriedItems) == 1:
                     # Carrying an item, need to go back to base
                     if position in self.teamZone and grid[position] == 0:
-                        actions.append(DropAction(characterId=character.id))
-                        characters_with_actions.add(character.id)  # Mark the character as having an action
+                        for char in game_message.yourCharacters:
+                            if character.id == char.id:
+                                continue
+                            if char.position == character.position:
+                                actions.append(random.choice([
+                                    MoveLeftAction(characterId=character.id),
+                                    MoveUpAction(characterId=character.id),
+                                    MoveRightAction(characterId=character.id),
+                                    MoveDownAction(characterId=character.id)
+                                ]
+                                ))
+                                characters_with_actions.add(character.id)
+                            else:
+                                actions.append(DropAction(characterId=character.id))
+                                characters_with_actions.add(character.id)
                     else:
+                        possible_path = []
                         for case in self.teamZone:
                             if grid[case] == 0:
                                 path = a_star_search(position, case, grid, grid_size)
                                 if path and len(path) > 1:
-                                    next_step = path[1]  # Move to the next position in the path
-                                    actions.append(
-                                        MoveToAction(characterId=character.id,
-                                                     position=Position(next_step[0], next_step[1])))
-                                    characters_with_actions.add(character.id)  # Mark the character as having an action
-                                    break
+                                    possible_path.append(path)  # Move to the next position in the path
+
+                            if possible_path:
+                                shortest_path = possible_path[0]
+                                for path in possible_path:
+                                    if len(path) < len(shortest_path):
+                                        shortest_path = path
+
+                                next_step = shortest_path[1]
+                                actions.append(
+                                    MoveToAction(characterId=character.id,
+                                                 position=Position(next_step[0], next_step[1])))
+                                characters_with_actions.add(character.id)
                                 # actions.append(MoveToAction(characterId=character.id, position=Position(case[0], case[1])))
                                 # characters_with_actions.add(character.id)  # Mark the character as having an action
                                 # break
@@ -234,7 +274,6 @@ class Bot:
                     characters_with_actions.add(character.id)  # Mark the character as having an action
                 else:
                     if numeric_values:
-
                         closest_position = numeric_values[0]
                         for value in numeric_values:
                             close = math.sqrt(closest_position[0][0]**2 + closest_position[0][1]**2)
