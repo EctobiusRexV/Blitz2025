@@ -27,6 +27,20 @@ class Bot:
         for wall in self.wall_positions:
             grid[wall] = -1
 
+        for item in game_message.items:
+            if item.type == "blitzium_core":
+                grid[(item.position.x, item.position.y)] = 5
+            elif item.type == "blitzium_ingot":
+                grid[(item.position.x, item.position.y)] = 3
+            elif item.type == "blitzium_nugget":
+                grid[(item.position.x, item.position.y)] = 1
+            elif item.type == "radiant_core":
+                grid[(item.position.x, item.position.y)] = -5
+            elif item.type == "radiant_slag":
+                grid[(item.position.x, item.position.y)] = -2
+
+        print(grid)
+
         # You can clearly do better than the random actions above! Have fun!
         return actions
 
