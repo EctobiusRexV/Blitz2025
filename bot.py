@@ -12,6 +12,7 @@ class Bot:
         self.wall_positions = []
         self.teamZone = []
         self.enemy_positions = []
+        self.enemyZone = []
 
     def get_next_move(self, game_message: TeamGameState):
         """
@@ -30,6 +31,11 @@ class Bot:
                     if game_message.currentTeamId == game_message.teamZoneGrid[line][column]:
                         self.teamZone.append((line, column))
 
+            for line in range(len(game_message.map.tiles)):
+                for column in range(len(game_message.map.tiles[line])):
+                    if game_message.currentTeamId != game_message.teamZoneGrid[line][column]:
+                        self.enemyZone.append((line, column))
+
 
 
         grid = np.zeros((game_message.map.width, game_message.map.height))
@@ -41,7 +47,7 @@ class Bot:
         for character in game_message.otherCharacters:
             self.enemy_positions.append((character.position.x, character.position.y))
 
-        print(self.enemy_positions)
+        #print(self.enemy_positions)
         for enemy in self.enemy_positions:
             grid[enemy] = -10  # Mark enemies as obstacles
 
@@ -58,10 +64,10 @@ class Bot:
             elif item.type == "radiant_slag":
                 grid[(item.position.x, item.position.y)] = -2
 
-        print(grid)
+        #print(grid)
 
-        # A* pathfinding with enemy avoidance
-        # A* pathfinding with enemy avoidance
+        #A* pathfinding with enemy avoidance
+
         def a_star_search(start, goal, grid, grid_size):
             # Priority queue for A* search
             open_set = []
@@ -158,18 +164,8 @@ class Bot:
         liste = []
 
 
-        """for row in grid:
-            for space in row:
-                print(space)
-                if space == -5:
-                    if space in self.teamZone:
-
-                        liste.append(MoveToAction(characterId = game_message.character.id, position = space))
-                        liste.append(GrabAction(characterId = game_message.character.id))"""
         #print(grid)
         list_caca = list(zip(*np.where(grid <= -2)))
-        #print("LISTE CACA")
-        #print(list_caca)
 
         list_to_clean = []
         for caca_pos in list_caca:
@@ -177,20 +173,57 @@ class Bot:
             if caca_pos in self.teamZone:
                 list_to_clean.append(caca_pos)
 
-
-        #print("LISTE TO CLEAN")
-        #print(list_to_clean)
-
         numeric_values = [(pair[0].item(), pair[1].item()) for pair in list_to_clean]
 
-        #print("NUMERIC VALUES")
-        #print(numeric_values)
-        for character in game_message.yourCharacters:
-            liste.append(MoveToAction(characterId = character.id, position=Position(numeric_values[0][0], numeric_values[0][1])))
+        #Aller au caca
+        # for character in game_message.yourCharacters:
+            # liste.append(MoveToAction(characterId = character.id, position=Position(numeric_values[0][0], numeric_values[0][1])))
 
         #AJOUTER UN MESSAGE DERREUR S'IL NY A PAS D'OBJET À PICKUP
-        ##for character in game_message.yourCharacters:
-         #   liste.append(GrabAction(characterId = character.id))
+        print(self.enemyZone)
+        for character in game_message.yourCharacters:
+            position = (character.position.x, character.position.y)
+            if len(character.carriedItems) == 1:
+                if position in self.enemyZone and grid[position] == 0:
+                    liste.append(DropAction(characterId=character.id))
+                else:
+                    for case in self.enemyZone:
+                        if grid[case] == 0:
+                            liste.append(MoveToAction(characterId=character.id, position=Position(case[0], case[1])))
+
+            if grid[character.position.x, character.position.y] <= -2 and position in self.teamZone:
+                liste.append(GrabAction(characterId=character.id))
+            else:
+                if numeric_values:
+                    liste.append(MoveToAction(characterId=character.id,
+                                              position=Position(numeric_values[0][0], numeric_values[0][1])))
+                    # destination = numeric_values[0][0]
+                    # path = a_star_search(position, destination, grid, grid_size)
+                    # if path and len(path) > 1:
+                    #     next_step = path[1]  # Move to the next position in the path
+                    #     actions.append(
+                    #         MoveToAction(characterId=character.id, position=Position(next_step[0], next_step[1])))
+
+        #
+        # for character in game_message.yourCharacters:
+        #
+        #     position_char = (character.position.x, character.position.y)
+        #     if len(character.carriedItems) == 0 and grid[position_char] >= 0:
+        #         liste.append(MoveToAction(characterId=character.id,
+        #                                   position=Position(numeric_values[0][0], numeric_values[0][1])))
+        #     elif position_char in self.teamZone and grid[position_char] <= -2:
+        #         liste.append(GrabAction(characterId = character.id))
+        #
+        #     print(self.enemyZone[0])
+        #     if character.numberOfCarriedItems == 1 and grid[position_char] == 0:
+        #        liste.append(MoveToAction(characterId = character.id, position = self.enemyZone[0]))
+            # if len(character.carriedItems) == 1 and grid[position_char] >= 0:
+            #     liste.append(MoveToAction(characterId = character.id, position = self.enemyZone[1]))
+
+        #Sortir le caca de la zone
+
+
+
 
 
 
