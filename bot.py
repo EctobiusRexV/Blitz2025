@@ -1,5 +1,6 @@
 import heapq
 import math
+import random
 
 import game_message
 from game_message import *
@@ -147,6 +148,8 @@ class Bot:
 
         for character in game_message.yourCharacters:
             somme = 0
+            if character.id in characters_with_actions:
+                continue  # Skip this character if it already has an action
             for item in character.carriedItems:
                 somme += item.value
 
@@ -155,22 +158,38 @@ class Bot:
                     position = (character.position.x, character.position.y)
                     if len(character.carriedItems) == 1:
                         if position in self.enemyZone and grid[position] == 0:
-                            actions.append(DropAction(characterId=character.id))
+                            for char in game_message.yourCharacters:
+                                if character.id == char.id:
+                                    continue
+                                if char.position == character.position:
+                                    actions.append(random.choice([
+                                        MoveLeftAction(characterId=character.id),
+                                        MoveUpAction(characterId=character.id),
+                                        MoveRightAction(characterId=character.id),
+                                        MoveDownAction(characterId=character.id)
+                                        ]
+                                    ))
+                                    characters_with_actions.add(character.id)
+                                else:
+                                    actions.append(DropAction(characterId=character.id))
+                                    characters_with_actions.add(character.id)
+
                         else:
                             for case in self.enemyZone:
                                 if grid[case] == 0:
                                     actions.append(
                                         MoveToAction(characterId=character.id, position=Position(case[0], case[1])))
-
-                    if grid[character.position.x, character.position.y] <= -2 and position in self.teamZone:
+                                    characters_with_actions.add(character.id)
+                    elif grid[character.position.x, character.position.y] <= -2 and position in self.teamZone:
                         actions.append(GrabAction(characterId=character.id))
+                        characters_with_actions.add(character.id)
                     else:
                         if numeric_caca:
                             actions.append(MoveToAction(characterId=character.id,
                                                       position=Position(numeric_caca[0][0], numeric_caca[0][1])))
+                            characters_with_actions.add(character.id)
             else:
-                if character.id in characters_with_actions:
-                    continue  # Skip this character if it already has an action
+
                 position = (character.position.x, character.position.y)
 
                 if len(character.carriedItems) == 1:
