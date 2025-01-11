@@ -127,54 +127,79 @@ class Bot:
             if blitzium_pos not in self.teamZone:
                 list_to_get.append((blitzium_pos, grid[blitzium_pos]))
 
+        list_caca = list(zip(*np.where(grid <= -2)))
+
+        list_to_clean = []
+        for caca_pos in list_caca:
+            if caca_pos in self.teamZone:
+                list_to_clean.append(caca_pos)
+
+        numeric_caca = [(pair[0].item(), pair[1].item()) for pair in list_to_clean]
+
         numeric_values = [(tuple(map(lambda x: x.item(), pair[0])), pair[1].item()) for pair in list_to_get]
 
         for character in game_message.yourCharacters:
-            if character.id in characters_with_actions:
-                continue  # Skip this character if it already has an action
+            somme = 0
+            for item in character.carriedItems:
+                somme += item.value
 
-            position = (character.position.x, character.position.y)
+            if len(numeric_caca) > 0 or somme < 0:
+                for character in game_message.yourCharacters:
+                    position = (character.position.x, character.position.y)
+                    if len(character.carriedItems) == 1:
+                        if position in self.enemyZone and grid[position] == 0:
+                            actions.append(DropAction(characterId=character.id))
+                        else:
+                            for case in self.enemyZone:
+                                if grid[case] == 0:
+                                    actions.append(
+                                        MoveToAction(characterId=character.id, position=Position(case[0], case[1])))
 
-            if len(character.carriedItems) == 1:
-                # Carrying an item, need to go back to base
-                if position in self.teamZone and grid[position] == 0:
-                    actions.append(DropAction(characterId=character.id))
+                    if grid[character.position.x, character.position.y] <= -2 and position in self.teamZone:
+                        actions.append(GrabAction(characterId=character.id))
+                    else:
+                        if numeric_caca:
+                            actions.append(MoveToAction(characterId=character.id,
+                                                      position=Position(numeric_caca[0][0], numeric_caca[0][1])))
+            else:
+                if character.id in characters_with_actions:
+                    continue  # Skip this character if it already has an action
+                position = (character.position.x, character.position.y)
+
+                if len(character.carriedItems) == 1:
+                    # Carrying an item, need to go back to base
+                    if position in self.teamZone and grid[position] == 0:
+                        actions.append(DropAction(characterId=character.id))
+                        characters_with_actions.add(character.id)  # Mark the character as having an action
+                    else:
+                        for case in self.teamZone:
+                            if grid[case] == 0:
+                                actions.append(MoveToAction(characterId=character.id, position=Position(case[0], case[1])))
+                                characters_with_actions.add(character.id)  # Mark the character as having an action
+                                break
+
+                if grid[character.position.x, character.position.y] > 0 and position not in self.teamZone:
+                    actions.append(GrabAction(characterId=character.id))
                     characters_with_actions.add(character.id)  # Mark the character as having an action
                 else:
-                    for case in self.teamZone:
-                        if grid[case] == 0:
-                            actions.append(MoveToAction(characterId=character.id, position=Position(case[0], case[1])))
+                    if numeric_values:
+
+                        closest_position = numeric_values[0]
+                        for value in numeric_values:
+                            close = math.sqrt(closest_position[0][0]**2 + closest_position[0][1]**2)
+                            new = math.sqrt(value[0][0]**2 + value[0][1]**2)
+
+                            if new < close:
+                                closest_position = value
+
+                        destination = closest_position[0]
+
+                        path = a_star_search(position, destination, grid, grid_size)
+                        if path and len(path) > 1:
+                            next_step = path[1]  # Move to the next position in the path
+                            actions.append(
+                                MoveToAction(characterId=character.id, position=Position(next_step[0], next_step[1])))
                             characters_with_actions.add(character.id)  # Mark the character as having an action
-                            break
-
-            if grid[character.position.x, character.position.y] > 0 and position not in self.teamZone:
-                actions.append(GrabAction(characterId=character.id))
-                characters_with_actions.add(character.id)  # Mark the character as having an action
-            else:
-                if numeric_values:
-
-                    closest_position = numeric_values[0]
-                    for value in numeric_values:
-                        close = math.sqrt(closest_position[0][0]**2 + closest_position[0][1]**2)
-                        new = math.sqrt(value[0][0]**2 + value[0][1]**2)
-
-                        if new < close:
-                            closest_position = value
-
-                    destination = closest_position[0]
-
-                    # destination = numeric_values[0][0]
-                    # for value in numeric_values:
-                    #     if value not in self.enemy_positions:
-                    #         destination = value[0]
-                    #         break
-
-                    path = a_star_search(position, destination, grid, grid_size)
-                    if path and len(path) > 1:
-                        next_step = path[1]  # Move to the next position in the path
-                        actions.append(
-                            MoveToAction(characterId=character.id, position=Position(next_step[0], next_step[1])))
-                        characters_with_actions.add(character.id)  # Mark the character as having an action
 
         print(actions)
         return actions
@@ -216,35 +241,6 @@ class Bot:
                 if numeric_values:
                     liste.append(MoveToAction(characterId=character.id,
                                               position=Position(numeric_values[0][0], numeric_values[0][1])))
-                    # destination = numeric_values[0][0]
-                    # path = a_star_search(position, destination, grid, grid_size)
-                    # if path and len(path) > 1:
-                    #     next_step = path[1]  # Move to the next position in the path
-                    #     actions.append(
-                    #         MoveToAction(characterId=character.id, position=Position(next_step[0], next_step[1])))
-
-        #
-        # for character in game_message.yourCharacters:
-        #
-        #     position_char = (character.position.x, character.position.y)
-        #     if len(character.carriedItems) == 0 and grid[position_char] >= 0:
-        #         liste.append(MoveToAction(characterId=character.id,
-        #                                   position=Position(numeric_values[0][0], numeric_values[0][1])))
-        #     elif position_char in self.teamZone and grid[position_char] <= -2:
-        #         liste.append(GrabAction(characterId = character.id))
-        #
-        #     print(self.enemyZone[0])
-        #     if character.numberOfCarriedItems == 1 and grid[position_char] == 0:
-        #        liste.append(MoveToAction(characterId = character.id, position = self.enemyZone[0]))
-            # if len(character.carriedItems) == 1 and grid[position_char] >= 0:
-            #     liste.append(MoveToAction(characterId = character.id, position = self.enemyZone[1]))
-
-        #Sortir le caca de la zone
-
-
-
-
-
 
         return liste
 
